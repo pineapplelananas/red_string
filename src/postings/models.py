@@ -72,11 +72,11 @@ class Choice(models.Model):
 # - - - - - - - - - - - - - - Enonce - - - - - - - - - - - - - - - - - -#
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 class Enonce(models.Model):
-    statement = models.CharField(max_length=500)
-    text = models.CharField(max_length=500)
-    image = models.CharField(max_length=500)
-    audio = models.CharField(max_length=500)
-    video = models.CharField(max_length=500)
+    statement = models.TextField()
+    text = models.TextField( blank=True, null=True)
+    image = models.TextField( blank=True, null=True)
+    audio = models.TextField( blank=True, null=True)
+    video = models.TextField( blank=True, null=True)
     ponderation = models.IntegerField(default=1)
     id_category = models.ForeignKey('Category', on_delete=models.CASCADE)
     id_test = models.ForeignKey('Test', on_delete=models.CASCADE)
@@ -84,16 +84,19 @@ class Enonce(models.Model):
     def __str__(self):
         return str(self.statement)
 
+    @property
+    def owner(self):
+        return self.user
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # - - - - - - - - - - - - - - Question - - - - - - - - - - - - - - - -#
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 class Question(models.Model):
     question_type = models.IntegerField(choices=QUESTION_TYPE_CHOICES, default=1)   
-    text = models.CharField(max_length=500, blank=True, null=True)
-    image = models.CharField(max_length=500, blank=True, null=True)
-    audio = models.CharField(max_length=500, blank=True, null=True)
-    video = models.CharField(max_length=500, blank=True, null=True)
-    statement = models.CharField(max_length=100)
+    text = models.TextField( blank=True, null=True)
+    image = models.TextField( blank=True, null=True)
+    audio = models.TextField( blank=True, null=True)
+    video = models.TextField( blank=True, null=True)
+    statement = models.TextField( blank=True, null=True)
     id_enonce = models.ForeignKey('Test', on_delete=models.CASCADE)
    
     def __str__(self):

@@ -1,22 +1,20 @@
-
+# -*- coding: utf-8 -*-
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from rest_framework import generics, mixins
-
+from django.contrib.auth import authenticate
+from django.views.decorators.csrf import csrf_exempt
 from postings.models import Candidat, CandidatSession,Category, Choice, Enonce, Question, Session, Test
-
-from .serializers import CandidatSerializer, CandidatSessionSerializer, ChoiceSerializer, EnonceSerializer, QuestionSerializer, CategorySerializer, SessionSerializer, TestSerializer
-
+from .serializers import ( CandidatSerializer, CandidatSessionSerializer, ChoiceSerializer, EnonceSerializer, QuestionSerializer, CategorySerializer,
+ SessionSerializer, TestSerializer)
+from .permissions import IsOwnerOrReadOnly
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import generics, mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from .permissions import IsOwnerOrReadOnly
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
@@ -127,14 +125,14 @@ class ChoiceAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-    # def put(self, request, *args, **kwargs):
-    #     return self.update(request, *args, **kwargs)
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
     
-    # def patch(self, request, *args, **kwargs):
-    #     return self.update(request, *args, **kwargs)
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
-    # def perform_create(self, serrializer):
-    #     serrializer.save(user=self.request.user)
+    def perform_create(self, serrializer):
+        serrializer.save(user=self.request.user)
 
 
    
@@ -162,7 +160,7 @@ class EnonceAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     #queryset = Enonce.objects.all()
 
     def get_queryset(self):
-        qs = Question.objects.all()
+        qs = Enonce.objects.all()
         query = self.request.GET.get("q")
         if query is not None:
             qs = qs.filter(Q(statement__icontains=query))
@@ -171,7 +169,15 @@ class EnonceAPIView(mixins.CreateModelMixin, generics.ListAPIView):
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-   
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+    
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    # def perform_create(self, serrializer):
+    #     serrializer.save(user=self.request.user)
+
 class EnonceRudView(generics.RetrieveUpdateDestroyAPIView):
     pass
     lookup_field =  'pk' # slug, id #url(r'?P<pk>\d+')
@@ -202,10 +208,50 @@ def login(request):
     login(request, user)
     return Response({'token': token.key}, status=HTTP_200_OK)
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+### save reponse candidat
+@csrf_exempt
+@api_view(["POST"])
+def sample_api(request):
+    data = [{"info_test":{"session_id": 1, "test_id":1 },           
+            "data" : {
+                "enonce_id": 1,
+                "question_id":1,
+                "data_question":
+                    {
+                    'answer': 5,
+                    'id': 1,
+                    'question': "saisie",
+                     }
+                 }
+        }
+    ]
+    return Response(data, status=HTTP_200_OK)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+#### enregistré le test avec les réponses d'un candidat
 @csrf_exempt
 @api_view(["GET"])
-def sample_api(request):
-    data = {'sample_data': 123}
+def test_reccord(request):
+    # get candidat et session puis test and questions
+    data =[]
+    info_test = {}
+    datas = {}
+    data = [{"info_test":{"session_id": 1, "test_id":1 },           
+            "datas" : {
+                "enonce_id": 1,
+                "question_id":1,
+                "data_question":
+                    {
+                    'answer': 5,
+                    'id': 1,
+                    'question': "saisie",
+                     }
+                 }
+        }
+    ]
     return Response(data, status=HTTP_200_OK)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
